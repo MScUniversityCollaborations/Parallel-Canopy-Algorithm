@@ -1,10 +1,33 @@
+#include <ostream>
+#include <iostream>
 #include <mpi.h>
 #include <cstdio>
+#include <ctime>
+#include <cstdlib>
 
-int main(int argc, char** argv) {
+using namespace std;
+
+#define ZERO 0
+
+void randomNumberGenerator(char rank) {
+    if(rank == ZERO){
+        int number0fPoints; 
+        cout << "Set number 0f points for clustering: "; // User Input
+        cin >> number0fPoints;     // Get user input from the keyboard
+        cout << "Your number is:\n" << number0fPoints; // Display the input value    
+
+        srand(time(0));  // Initialize random number generator.
+        cout << "Random numbers generated between 1 and 10:" << endl;
+        for(int i=0; i<number0fPoints ;i++){
+            cout << (rand() % 10) + 1<<" "; 
+        }
+    }
+}
+
+void mpi() {
     // Initialize the MPI environment
     MPI_Init(NULL, NULL);
-
+        
     // Get the number of processes
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
@@ -22,6 +45,16 @@ int main(int argc, char** argv) {
     printf("Hello world from processor %s, rank %d out of %d processors with cpp \n",
            processor_name, world_rank, world_size);
 
+
     // Finalize the MPI environment.
     MPI_Finalize();
+
 }
+
+int main(int argc, char** argv) {
+    
+    
+
+    
+}
+
