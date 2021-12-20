@@ -89,8 +89,6 @@ int main(int argc, char** argv) {
     cout << "Your number is:\n" << number0fPoints; // Display the input value  
 
     generateRandomCoordinates(0,number0fPoints);
-
-    
+   
     
 }
-
