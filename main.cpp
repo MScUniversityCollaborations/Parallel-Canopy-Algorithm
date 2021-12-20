@@ -1,27 +1,57 @@
 #include <ostream>
 #include <iostream>
-#include <mpi.h>
+#include <mpi.h>    
 #include <cstdio>
 #include <ctime>
 #include <cstdlib>
 
 using namespace std;
 
-#define ZERO 0
+#define ZERO 0  
 
-void randomNumberGenerator(char rank) {
-    if(rank == ZERO){
-        int number0fPoints; 
-        cout << "Set number 0f points for clustering: "; // User Input
-        cin >> number0fPoints;     // Get user input from the keyboard
-        cout << "Your number is:\n" << number0fPoints; // Display the input value    
+// struct Point
+// {
+//     public:
+//         int x;
+//         int y;
+// };
 
-        srand(time(0));  // Initialize random number generator.
-        cout << "Random numbers generated between 1 and 10:" << endl;
-        for(int i=0; i<number0fPoints ;i++){
-            cout << (rand() % 10) + 1<<" "; 
-        }
+void generateRandomCoordinates(char rank,int numberOfRandCoordinates) {
+    if(rank == ZERO) {
+
+            srand(time(NULL));
+
+            float divide = 69/4.20;
+            double coordinateX, coordinateY;
+            bool xsign, ysign; // true if negative
+            
+            double arrX[numberOfRandCoordinates];
+            double arrY[numberOfRandCoordinates];
+            
+            for(int i=0; i<numberOfRandCoordinates; i++)
+            {
+             
+                coordinateX = rand()%1000;
+                coordinateY = rand()%1000;
+               
+                xsign = rand()%4;
+                ysign = rand()%4;
+                
+                if(xsign) coordinateX /=  divide;
+                if(ysign) coordinateY /=  divide;
+           
+            
+                arrX[i] = coordinateX;
+                arrY[i] = coordinateY;		
+            
+            }
+            
+            for (int i=0; i  < numberOfRandCoordinates; i++) {
+                cout << arrX[i] << ", " << arrY[i] << endl;
+            }		
+		            
     }
+    
 }
 
 void mpi() {
@@ -52,9 +82,15 @@ void mpi() {
 }
 
 int main(int argc, char** argv) {
-    
-    
 
+    int number0fPoints; 
+    cout << "Set number 0f points for clustering: "; // User Input
+    cin >> number0fPoints;     // Get user input from the keyboard
+    cout << "Your number is:\n" << number0fPoints; // Display the input value  
+
+    generateRandomCoordinates(0,number0fPoints);
+
+    
     
 }
 
