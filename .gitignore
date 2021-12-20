@@ -116,3 +116,4 @@ gen
 .vscode/c_cpp_properties.json
 .vscode/tasks.json
 .vscode/settings.json
+perallel_canopy_mpi
