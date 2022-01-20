@@ -4,20 +4,55 @@
 #include <cstdio>
 #include <ctime>
 #include <cstdlib>
-
+#include <bits/stdc++.h>
 using namespace std;
 
 #define ZERO 0  
 
-// struct Point
-// {
-//     public:
-//         int x;
-//         int y;
-// };
+class Point{
 
-void generateRandomCoordinates(char rank,int numberOfRandCoordinates) {
-    if(rank == ZERO) {
+    private:
+
+        int point_id, cluster_id;
+        vector<double> dimensions;
+        int total_dimensions;
+
+
+    public:
+        Point(int point_id, vector<double> dimensions)
+        {
+            this->point_id = point_id;
+            total_dimensions = dimensions.size();
+
+            for(int i = 0; i<total_dimensions; i++)
+                this->dimensions.push_back(dimensions[i]);
+
+            cluster_id = -1;
+        }
+
+        int getID()
+        {
+            return point_id;
+        }
+
+        void setCluster(int cluster_id)
+        {
+            this->cluster_id = cluster_id;
+        }
+
+        double getDimensions(int index)
+        {
+            return dimensions[index];
+        }
+
+        int getTotaldimensions()
+        {
+            return total_dimensions;
+        }
+
+};
+
+void generateRandomCoordinates(int numberOfRandCoordinates) {
 
             srand(time(NULL));
 
@@ -47,10 +82,7 @@ void generateRandomCoordinates(char rank,int numberOfRandCoordinates) {
             
             for (int i=0; i  < numberOfRandCoordinates; i++) {
                 cout << arrX[i] << ", " << arrY[i] << endl;
-            }		
-		            
-    }
-    
+            }	
 }
 
 void mpi() {
@@ -72,8 +104,8 @@ void mpi() {
         cout << "Set number of points for clustering: \n"; // User Input
         cin >> number0fPoints;     // Get user input from the keyboard
         cout << "Your number is:\n" << number0fPoints; // Display the input value  
-        generateRandomCoordinates(0,number0fPoints);
-        
+        generateRandomCoordinates(number0fPoints);
+        MPI_Scatter(MPI_COMM_WORLD);
     }
 
 
