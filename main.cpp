@@ -9,48 +9,79 @@ using namespace std;
 
 #define ZERO 0  
 
-class Point{
+int num_dimensions = 2;
+
+class Point {
 
     private:
+        int point_id;
+        int cluster_id = -1; // from 0..(k-1), or -1 if unassigned
 
-        int point_id, cluster_id;
-        vector<double> dimensions;
-        int total_dimensions;
-
-
+    protected:
+        float* vals;
+    
     public:
-        Point(int point_id, vector<double> dimensions)
-        {
-            this->point_id = point_id;
-            total_dimensions = dimensions.size();
-
-            for(int i = 0; i<total_dimensions; i++)
-                this->dimensions.push_back(dimensions[i]);
-
+        static int point_id_counter;
+        Point() {
+            vals = new float[num_dimensions];
+            memset(vals, 0, sizeof(vals)); // It copies a single character for a specified number of times to an object.
             cluster_id = -1;
+            point_id = point_id_counter++;
         }
 
-        int getID()
-        {
+
+        Point(float *vals) {
+            this->vals = new float[num_dimensions];
+            memcpy(this->vals, vals, sizeof(float)*num_dimensions); // Copies contents of vals to this->vals 
+            cluster_id = -1;
+            point_id = point_id_counter++;
+        }
+
+        Point(vector<float>& vals) {
+            assert(vals.size() == num_dimensions);  //Assume that vals.size() is num_dimensions in the rest of the code
+            this->vals = new float[num_dimensions];
+            memcpy(this->vals, vals.data(), sizeof(this->vals)); // Copies contents of  vals.data() to this->vals 
+            cluster_id = -1;
+            point_id = point_id_counter++;
+        }
+
+        int get_point_id() const {
             return point_id;
         }
 
-        void setCluster(int cluster_id)
-        {
+        int get_cluster_id() const {
+            return cluster_id;
+        }
+
+        void set_cluster_id(int cluster_id) {
             this->cluster_id = cluster_id;
         }
 
-        double getDimensions(int index)
-        {
-            return dimensions[index];
+        float get_val(int i) const {
+            
+            return vals[i];
         }
 
-        int getTotaldimensions()
-        {
-            return total_dimensions;
+        float get_squared_dist(Point& other_point) const {
+            float result = 0.0;
+            for (int i=0; i<num_dimensions; i++) {
+            result += pow(vals[i] - other_point.vals[i], 2);
+            }
+            return result;
         }
 
+        void print() const {
+            for (int i=0; i<num_dimensions; i++) {
+            cout << vals[i] << ' ';
+            }
+            cout << endl;
+        }
+
+        bool operator==(const Point& other_point) const {
+            return other_point.get_point_id() == point_id;
+        }
 };
+
 
 void generateRandomCoordinates(int numberOfRandCoordinates) {
 
