@@ -13,8 +13,6 @@
 #include <sstream>
 using namespace std;
 
-//#define NDEBUG
-
 int world_rank;
 int world_size;
 
@@ -184,15 +182,6 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
 
   // each process has a chunk of points
 
-// #ifdef DEBUG
-//   // TODO : remove this
-//   printf("process %d\n", world_rank);
-//   for (Point* p : points) {
-//     printf("%d   ", world_rank);
-//     p->print();
-//   }
-// #endif
-
   unordered_set<Point*> point_set;
   for (Point* p : points) {
     point_set.insert(p);
@@ -266,21 +255,17 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     if (world_rank == 0) {
       canopies.push_back(Canopy(new_canopy_centre));
     }
-//  #ifdef DEBUG
-//     printf("centre %d ", world_rank);
-//     new_canopy_centre->print();
-//  #endif
 
     vector<Point*> points_to_erase;
     for (Point* p : point_set) {
       float squared_dist = new_canopy_centre->get_squared_dist(*p);
       if (squared_dist < T1 * T1) {
- #ifdef DEBUG
-        if (p->get_point_id() >= scatter_counts[world_rank]) {
-          printf("ERROR ERROR ERROR %d\n", p->get_point_id());
-          continue;
-        }
- #endif
+//  #ifdef DEBUG
+//         if (p->get_point_id() >= scatter_counts[world_rank]) {
+//           printf("ERROR ERROR ERROR %d\n", p->get_point_id());
+//           continue;
+//         }
+//  #endif
         canopy_id_send_data[p->get_point_id()] = canopy_id;
       }
       if (squared_dist < T2 * T2) {
@@ -339,10 +324,6 @@ int main(int argc, char** argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-// #ifdef DEBUG
-//   printf("Rank : %d\n", world_rank);
-// #endif
-
   vector<Point*> all_points;
   if (world_rank == 0) {
     //int number0fPoints; 
@@ -352,11 +333,6 @@ int main(int argc, char** argv) {
     generate_points(all_points, num_points);
     num_points = all_points.size();
 
-// #ifdef DEBUG
-//     for (const Point* p : all_points) {
-//       p->print();
-//     }
-// #endif
   }
 
   // call canopy
