@@ -9,6 +9,9 @@
 #include <mpi.h>
 using namespace std;
 
+double startClock, endClock;
+double counter = 0.0;
+
 int world_rank;
 int world_size;
 
@@ -276,7 +279,7 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     gather_displs[i] = sum;
     sum += gather_counts[i];
   }
-
+  
   MPI_Gatherv(canopy_id_send_data, gather_counts[world_rank], MPI_INT,
              canopy_id_data, gather_counts, gather_displs, MPI_INT,
              0, MPI_COMM_WORLD);
@@ -300,8 +303,9 @@ int main(int argc, char** argv) {
 
   // Kaloume tin sinartisi MPI_Init gia na ksekinoume ton ypologismo.
   // Episis, topothetoume dio times NULL gia to argc & argv dioti den xriazomaste orismata stin main.
+ 
   MPI_Init(NULL, NULL);
-
+  startClock = MPI_Wtime(); //ekkinisi xronometrisis
   // to srand ekteleite mia fora stin arxi tis main gia na arxikopioithei to PRNG (Pseudo-Random Number Generator),
   // to opoio dimiourgei mia nteterministiki akolouthia arithmwn pou eksartate apo ton algorithmo pou xrisimopoioume.
   srand(time(NULL));
@@ -314,21 +318,25 @@ int main(int argc, char** argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
   // Vriskoume to plithos twn diergasiwn.
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
+    
+  
   vector<Point*> all_points;
 
   // Ean vriskomaste stin diergasia 0 tote tha paraksoume simeia.
   if (world_rank == 0) {
+    counter -= MPI_Wtime(); //Xronometrisi gennitrias paragogis aritmon
     generate_points(all_points, number0fPoints);
     number0fPoints = all_points.size();
-
+    counter += MPI_Wtime();
   }
 
+    
   // Kaloume to Canopy gia na paroume ola ta simeia.
   vector<Canopy> canopies = canopy_mpi(all_points);
+  endClock = MPI_Wtime(); //termatismos xronometrisis
 
   // Efoson eimaste stin diergasia 0 tote tha tiposoume ta simeia.
-  if (world_rank == 0) {
+  if (world_rank == 0 ) {
 
     // Twra tiponoume ta simeia.
     cout<<"Resulted clusters: "<<endl;
@@ -337,9 +345,21 @@ int main(int argc, char** argv) {
       c.print();
       c.printElements();
     }
-  }
 
-  // I sinartisi MPI_Finalize() katharizei oles tis katastaseis pou sxetizontai me to MPI.
+      double processorsTime = endClock - startClock;
+      double finalTime = processorsTime - counter ;
+
+      cout << "----------------------------------------------\n";
+      printf ("-Measured Work Took: %0.8f sec", processorsTime);
+      cout << "\n";
+      cout << "-Measured Generation of Points Took: " << counter << " seconds to run." <<endl;
+      cout << "\n";
+      cout << "-Measured Whole Work Took: " << finalTime << " seconds." <<endl;
+      cout << "----------------------------------------------\n";
+  }
+ 
+  // I sinartisi MPI_Finalize() termatizei oles tis katastaseis pou sxetizontai me to MPI.
   MPI_Finalize();
+   
   return 0;
 }
