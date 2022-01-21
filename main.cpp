@@ -16,7 +16,7 @@ using namespace std;
 int world_rank;
 int world_size;
 
-int num_points =150000;
+int num_points =150;
 int num_dimensions = 2;
 
 float T1 = 200; // loose distance
