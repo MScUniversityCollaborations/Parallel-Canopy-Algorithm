@@ -12,16 +12,17 @@ using namespace std;
 int world_rank;
 int world_size;
 
-int number0fPoints = 1500; //number of points for clustering
-int dimensionsOfPoint = 3;
+int number0fPoints = 1500; // Arithmos simeiwn pou tha dimiourgithoun.
+int dimensionsOfPoint = 3; // Arithmos twn diastasewn twn simeiwn, px 2 gia 2D -> x1,x2,y1,y2.
 
-float distance1 = 200; // loose distance T1
-float distance2 = 100; // tight distance T2
+float distanceT1 = 200; // Xalari apostasi katwfliwn (T1 > T2).
+float distanceT2 = 100; // Steni apostasi katwfliwn.
 
+// Point class gia na diaxirizomaste ta dedomena pio eukola kai organomena.
 class Point {
 private:
   int point_id;
-  
+
 protected:
   float* vals;
 
@@ -51,7 +52,7 @@ public:
   }
 
   float get_val(int i) const {
-    
+
     return vals[i];
   }
 
@@ -75,6 +76,8 @@ public:
   }
 };
 
+
+// Canopy class
 class Canopy {
 private:
   vector<Point*> data_points;
@@ -120,8 +123,8 @@ void generate_points(vector<Point*>& points, int number0fPoints) {
 
 vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
 
-  // the main process will generate points and scatter them among
-  // other processes
+  // I kiria diergasia tha dimiourgisei ta simeia kai tha ta kanei scatter metaksi
+  // stis alles diergasies.
   int rec_buff_cnt =
     (number0fPoints / world_size + (world_rank < number0fPoints % world_size ? 1 : 0)) * dimensionsOfPoint;
   float* rec_buff = new float[rec_buff_cnt];
@@ -154,14 +157,14 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
                rec_buff, rec_buff_cnt, MPI_FLOAT,
                0, MPI_COMM_WORLD);
 
-  // reconstruct points from rec_points_data
+  // Anasximatizoume ta simeia apo to data.
   Point::point_id_counter = 0;
   for (int i=0; i<rec_buff_cnt; i += dimensionsOfPoint) {
     Point* data_point = new Point(rec_buff + i);
     points.push_back(data_point);
   }
 
-  // each process has a chunk of points
+  // Kathe diergasia periexei ena kommati simeiwn.
 
   unordered_set<Point*> point_set;
   for (Point* p : points) {
@@ -169,7 +172,7 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
   }
 
   vector<Canopy> canopies;
-  
+
   while (!point_set.empty()) {
     Point* new_canopy_centre = *(point_set.begin());
     Canopy new_canopy(new_canopy_centre);
@@ -177,10 +180,10 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     vector<Point*> points_to_erase;
     for (Point* p : point_set) {
       float squared_dist = new_canopy_centre->get_squared_dist(*p);
-      if (squared_dist < distance1 * distance1) {
+      if (squared_dist < distanceT1 * distanceT1) {
         new_canopy.add_point(p);
       }
-      if (squared_dist < distance2 * distance2) {
+      if (squared_dist < distanceT2 * distanceT2) {
         points_to_erase.push_back(p);
       }
     }
@@ -190,7 +193,7 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     canopies.push_back(new_canopy);
   }
 
-  // process that picks the new canopy centre
+  // Diergasia i opoia epilegei to neo kentro canopy.
   int root_process = 0;
   int canopy_id = 0;
   int* canopy_id_send_data = new int[scatter_counts[world_rank] / 2];
@@ -199,7 +202,7 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
   while (true) {
     MPI_Barrier(MPI_COMM_WORLD);
 
-    // try to update the root_process
+    // Prospathoume na ananeosoume tin kiria diergasia: root_process
     int prev_root_process = root_process;
     int temp_root_process = root_process;
     if (world_rank == root_process && point_set.empty()) {
@@ -209,26 +212,30 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     root_process = temp_root_process;
 
     if (root_process >= world_size) {
-      // we got through all the processes and can break
+      // Ean metavoume apo ola tis diergasies tote kanoume break gia na vgoume apo to while loop.
       break;
     }
 
     if (root_process != prev_root_process) {
-    
+
       continue;
     }
 
     Point* new_canopy_centre = NULL;
     float* new_canopy_centre_data = new float[dimensionsOfPoint];
+
     if (world_rank == root_process) {
       new_canopy_centre = *(point_set.begin());
       point_set.erase(new_canopy_centre);
+
       for (int i=0; i<dimensionsOfPoint; i++) {
         new_canopy_centre_data[i] = new_canopy_centre->get_val(i);
       }
     }
-    //broadcast new canopy centre
+
+    // Kanoume Broadcast to neo kentro canopy.
     MPI_Bcast(new_canopy_centre_data, dimensionsOfPoint, MPI_FLOAT, root_process, MPI_COMM_WORLD);
+
     if (world_rank != root_process) {
       new_canopy_centre = new Point(new_canopy_centre_data);
     }
@@ -239,10 +246,10 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     vector<Point*> points_to_erase;
     for (Point* p : point_set) {
       float squared_dist = new_canopy_centre->get_squared_dist(*p);
-      if (squared_dist < distance1 * distance1) {
+      if (squared_dist < distanceT1 * distanceT1) {
         canopy_id_send_data[p->get_point_id()] = canopy_id;
       }
-      if (squared_dist < distance2 * distance2) {
+      if (squared_dist < distanceT2 * distanceT2) {
         points_to_erase.push_back(p);
       }
     }
@@ -252,7 +259,7 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     canopy_id++;
   }
 
-  // gather the information about canopy points in process 0
+  // Kanoume Gather tin pliroforia gia ta simeia canopy stin diergasia 0.
   int* canopy_id_data = NULL;
   if (world_rank == 0) {
     canopy_id_data = new int[all_points.size()];
@@ -274,7 +281,7 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
              canopy_id_data, gather_counts, gather_displs, MPI_INT,
              0, MPI_COMM_WORLD);
 
-  // create new canopy in process 0
+  // Dimourgoume neo canopy stin diergasia 0.
   if (world_rank == 0) {
     for (int i=0; i<all_points.size(); i++) {
       if (canopy_id_data[i] != -1) {
@@ -287,31 +294,43 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
 
 int Point::point_id_counter = 0;
 
+
+// Sinartisi main.
 int main(int argc, char** argv) {
 
+  // Kaloume tin sinartisi MPI_Init gia na ksekinoume ton ypologismo.
+  // Episis, topothetoume dio times NULL gia to argc & argv dioti den xriazomaste orismata stin main.
   MPI_Init(NULL, NULL);
 
+  // to srand ekteleite mia fora stin arxi tis main gia na arxikopioithei to PRNG (Pseudo-Random Number Generator),
+  // to opoio dimiourgei mia nteterministiki akolouthia arithmwn pou eksartate apo ton algorithmo pou xrisimopoioume.
   srand(time(NULL));
 
-  assert(distance1 > distance2);
+  // Prepei na isxuei i sxesi T1 > T2 opotan me to assert tha elenxoume auti tin sinthiki kai an den einai true,
+  // tote tha stamatisei to programma.
+  assert(distanceT1 > distanceT2);
 
+  // Vriskoume to ID tis diergasias.
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  // Vriskoume to plithos twn diergasiwn.
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
   vector<Point*> all_points;
+
+  // Ean vriskomaste stin diergasia 0 tote tha paraksoume simeia.
   if (world_rank == 0) {
     generate_points(all_points, number0fPoints);
     number0fPoints = all_points.size();
 
   }
 
-  // call canopy
+  // Kaloume to Canopy gia na paroume ola ta simeia.
   vector<Canopy> canopies = canopy_mpi(all_points);
 
-  // print points
+  // Efoson eimaste stin diergasia 0 tote tha tiposoume ta simeia.
   if (world_rank == 0) {
-   
-    // print canopies
+
+    // Twra tiponoume ta simeia.
     cout<<"Resulted clusters: "<<endl;
     for (Canopy& c : canopies) {
       cout<<"Cluster center: ";
@@ -320,6 +339,7 @@ int main(int argc, char** argv) {
     }
   }
 
+  // I sinartisi MPI_Finalize() katharizei oles tis katastaseis pou sxetizontai me to MPI.
   MPI_Finalize();
   return 0;
 }
