@@ -2,22 +2,18 @@
 #include <vector>
 #include <cassert>
 #include <cstring>
-#include <cstdlib>
 #include <cfloat>
-#include <unordered_map>
 #include <unordered_set>
 #include <cmath>
 #include <ctime>
 #include <mpi.h>
-#include <fstream>
-#include <sstream>
 using namespace std;
 
 int world_rank;
 int world_size;
 
-int number0fPoints = 150; //number of points for clustering
-int dimensionsOfPoint = 2;
+int number0fPoints = 1500; //number of points for clustering
+int dimensionsOfPoint = 3;
 
 float distance1 = 200; // loose distance T1
 float distance2 = 100; // tight distance T2
