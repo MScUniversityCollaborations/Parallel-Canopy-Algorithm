@@ -25,22 +25,21 @@ float T2 = 100; // tight distance
 class Point {
 private:
   int point_id;
-  //int cluster_id = -1; // from 0..(k-1), or -1 if unassigned
+  
 protected:
   float* vals;
+
 public:
   static int point_id_counter;
   Point() {
     vals = new float[num_dimensions];
     memset(vals, 0, sizeof(vals));
-    //cluster_id = -1;
     point_id = point_id_counter++;
   }
 
   Point(float *vals) {
     this->vals = new float[num_dimensions];
     memcpy(this->vals, vals, sizeof(float)*num_dimensions);
-    //cluster_id = -1;
     point_id = point_id_counter++;
   }
 
@@ -48,21 +47,12 @@ public:
     assert(vals.size() == num_dimensions);
     this->vals = new float[num_dimensions];
     memcpy(this->vals, vals.data(), sizeof(this->vals));
-    //cluster_id = -1;
     point_id = point_id_counter++;
   }
 
   int get_point_id() const {
     return point_id;
   }
-
-//   int get_cluster_id() const {
-//     return cluster_id;
-//   }
-
-//   void set_cluster_id(int cluster_id) {
-//     this->cluster_id = cluster_id;
-//   }
 
   float get_val(int i) const {
     
