@@ -18,17 +18,14 @@ int world_size;
 
 int num_points =150000;
 int num_dimensions = 2;
-bool print_canopies = true;
 
 float T1 = 200; // loose distance
 float T2 = 100; // tight distance
 
-string fileName;
-
 class Point {
 private:
   int point_id;
-  int cluster_id = -1; // from 0..(k-1), or -1 if unassigned
+  //int cluster_id = -1; // from 0..(k-1), or -1 if unassigned
 protected:
   float* vals;
 public:
@@ -36,14 +33,14 @@ public:
   Point() {
     vals = new float[num_dimensions];
     memset(vals, 0, sizeof(vals));
-    cluster_id = -1;
+    //cluster_id = -1;
     point_id = point_id_counter++;
   }
 
   Point(float *vals) {
     this->vals = new float[num_dimensions];
     memcpy(this->vals, vals, sizeof(float)*num_dimensions);
-    cluster_id = -1;
+    //cluster_id = -1;
     point_id = point_id_counter++;
   }
 
@@ -51,7 +48,7 @@ public:
     assert(vals.size() == num_dimensions);
     this->vals = new float[num_dimensions];
     memcpy(this->vals, vals.data(), sizeof(this->vals));
-    cluster_id = -1;
+    //cluster_id = -1;
     point_id = point_id_counter++;
   }
 
@@ -59,13 +56,13 @@ public:
     return point_id;
   }
 
-  int get_cluster_id() const {
-    return cluster_id;
-  }
+//   int get_cluster_id() const {
+//     return cluster_id;
+//   }
 
-  void set_cluster_id(int cluster_id) {
-    this->cluster_id = cluster_id;
-  }
+//   void set_cluster_id(int cluster_id) {
+//     this->cluster_id = cluster_id;
+//   }
 
   float get_val(int i) const {
     
@@ -91,7 +88,6 @@ public:
     return other_point.get_point_id() == point_id;
   }
 };
-
 
 class Canopy {
 private:
@@ -137,7 +133,6 @@ void generate_points(vector<Point*>& points, int num_points) {
 
 
 vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
-  //printf("point_id_counter %d %d\n", Point::point_id_counter, world_rank);
 
   // the main process will generate points and scatter them among
   // other processes
@@ -229,12 +224,11 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
 
     if (root_process >= world_size) {
       // we got through all the processes and can break
-      //printf("breaking %d\n", world_rank);
       break;
     }
 
     if (root_process != prev_root_process) {
-      //printf("continue\n");
+    
       continue;
     }
 
@@ -260,12 +254,6 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     for (Point* p : point_set) {
       float squared_dist = new_canopy_centre->get_squared_dist(*p);
       if (squared_dist < T1 * T1) {
-//  #ifdef DEBUG
-//         if (p->get_point_id() >= scatter_counts[world_rank]) {
-//           printf("ERROR ERROR ERROR %d\n", p->get_point_id());
-//           continue;
-//         }
-//  #endif
         canopy_id_send_data[p->get_point_id()] = canopy_id;
       }
       if (squared_dist < T2 * T2) {
@@ -326,10 +314,6 @@ int main(int argc, char** argv) {
 
   vector<Point*> all_points;
   if (world_rank == 0) {
-    //int number0fPoints; 
-    // int num_points;
-    // cout << "Set number of points for clustering: \n"; // User Input
-    // cin >> num_points;     // Get user input from the keyboard
     generate_points(all_points, num_points);
     num_points = all_points.size();
 
@@ -339,7 +323,7 @@ int main(int argc, char** argv) {
   vector<Canopy> canopies = canopy_mpi(all_points);
 
   // print points
-  if (world_rank == 0 && print_canopies) {
+  if (world_rank == 0) {
    
     // print canopies
     cout<<"Resulted clusters: "<<endl;
