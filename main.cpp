@@ -15,8 +15,8 @@ double counter = 0.0;
 int world_rank;
 int world_size;
 
-int number0fPoints = 1500; // Arithmos simeiwn pou tha dimiourgithoun.
-int dimensionsOfPoint = 3; // Arithmos twn diastasewn twn simeiwn, px 2 gia 2D -> x1,x2,y1,y2.
+int number0fPoints = 250; // Arithmos simeiwn pou tha dimiourgithoun.
+int dimensionsOfPoint = 2; // Arithmos twn diastasewn twn simeiwn, px 2 gia 2D -> x1,x2,y1,y2.
 
 float distanceT1 = 200; // Xalari apostasi katwfliwn (T1 > T2).
 float distanceT2 = 100; // Steni apostasi katwfliwn.
@@ -73,10 +73,6 @@ public:
     }
     cout << endl;
   }
-
-  bool operator==(const Point& other_point) const {
-    return other_point.get_point_id() == point_id;
-  }
 };
 
 
@@ -100,7 +96,7 @@ public:
     return data_points;
   }
 
-  void print() {
+  void printCenter() {
     centre->print();
   }
 
@@ -344,8 +340,11 @@ int main(int argc, char** argv) {
     cout<<"Resulted clusters: "<<endl;
     for (Canopy& c : canopies) {
       cout<<"Cluster center: ";
-      c.print();
+      c.printCenter();
+      cout << "\n";
+ 
       c.printElements();
+      cout<<"----------------------\n";
     }
 
       double processorsTime = endClock - startClock;
