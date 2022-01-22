@@ -79,27 +79,33 @@ public:
 // Canopy class
 class Canopy {
 private:
-  vector<Point*> data_points;
+  vector<Point*> data_points; // dianusma gia apothikeusi ton simeion 
   Point* centre;
 public:
+
+  // prosthiki center sto data_points
   Canopy(Point* centre) {
     assert(centre);
     this->centre = centre;
     data_points.push_back(centre);
   }
 
+  // prosthiki simeiou sto vector
   void add_point(Point* point) {
     data_points.push_back(point);
   }
 
+  // pernoume ta simeia apo to data_points
   vector<Point*> get_data_points() {
     return data_points;
   }
 
+  // ektiposi ton kentron
   void printCenter() {
     centre->print();
   }
 
+  // ektiposi ton simeion gia kathe cluster 
   void printElements() const {
     for (int i=0; i<data_points.size(); i++) {
       cout << "\t";
@@ -119,7 +125,8 @@ void generate_points(vector<Point*>& points, int number0fPoints) {
   }
 }
 
-
+// Canopy algorith, dinoume san eisodo ola ta simeia 
+// kai epistrefei se ena vector olous tou canopies
 vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
 
   // I kiria diergasia tha dimiourgisei ta simeia kai tha ta kanei scatter metaksi
@@ -170,6 +177,7 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     point_set.insert(p);
   }
 
+  // dimiourgia enos dianismatos tipou canopy
   vector<Canopy> canopies;
 
   while (!point_set.empty()) {
