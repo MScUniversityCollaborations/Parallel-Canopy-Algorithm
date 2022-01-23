@@ -114,14 +114,15 @@ public:
   }
 };
 
+// gennitria i opoia paragi ta simeia kai ta apothikeuei se ena vector
 void generate_points(vector<Point*>& points, int number0fPoints) {
-  for (int i=0; i<number0fPoints; i++) {
-    float vals[dimensionsOfPoint];
-    for (int j=0; j<dimensionsOfPoint; j++) {
-      vals[j] = ((rand() / float(RAND_MAX) ) * 1000);
+  for (int i=0; i<number0fPoints; i++) { // epanalipsis gia ola ta simeia
+    float vals[dimensionsOfPoint]; //orizoume to megethos tou pinaka analoga me to plithos ton diastaseon tou seimiou
+    for (int j=0; j<dimensionsOfPoint; j++) { // epanalipsi gia tin parametro N, diastasis simeiou
+      vals[j] = ((rand() / float(RAND_MAX) ) * 1000); // paragogi simeion, isxoroume tis tixaies times ston pinaka
     }
-    Point* point = new Point(vals);
-    points.push_back(point);
+    Point* point = new Point(vals); //dimiourgia Point* (dieuthinsis) gia na apothikeusoume to simeio
+    points.push_back(point); // isxorisi tis dieuthinsis ston vector
   }
 }
 
@@ -159,10 +160,11 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
       }
     }
   }
+
+  // diamerismos dedomenos pros sistadopoihsi se oles tis diergasies
   MPI_Scatterv(data, scatter_counts, scatter_displs, MPI_FLOAT,
                rec_buff, rec_buff_cnt, MPI_FLOAT,
                0, MPI_COMM_WORLD);
-
   // Anasximatizoume ta simeia apo to data.
   Point::point_id_counter = 0;
   for (int i=0; i<rec_buff_cnt; i += dimensionsOfPoint) {
@@ -285,6 +287,7 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     sum += gather_counts[i];
   }
 
+  // epanenosi dedomenon apo ole tis diergasies
   MPI_Gatherv(canopy_id_send_data, gather_counts[world_rank], MPI_INT,
              canopy_id_data, gather_counts, gather_displs, MPI_INT,
              0, MPI_COMM_WORLD);
