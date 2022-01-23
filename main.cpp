@@ -15,8 +15,8 @@ double counter = 0.0;
 int world_rank;
 int world_size;
 
-int number0fPoints = 250; // Arithmos simeiwn pou tha dimiourgithoun.
-int dimensionsOfPoint = 2; // Arithmos twn diastasewn twn simeiwn, px 2 gia 2D -> x1,x2,y1,y2.
+int number0fPoints = 7443233; // Arithmos simeiwn pou tha dimiourgithoun.
+int dimensionsOfPoint = 3; // Arithmos twn diastasewn twn simeiwn, px 2 gia 2D -> x1,x2,y1,y2.
 
 float distanceT1 = 200; // Xalari apostasi katwfliwn (T1 > T2).
 float distanceT2 = 100; // Steni apostasi katwfliwn.
@@ -171,7 +171,8 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
   }
 
   // Kathe diergasia periexei ena kommati simeiwn.
-
+  // me tin xrisi tou unordered_set exasfalizoume oti exoume monadika klidia 
+  // etsi kathe eggrafi einai monadiki,episis exasfalizoume oti i eisagogi ginetai tuxaia
   unordered_set<Point*> point_set;
   for (Point* p : points) {
     point_set.insert(p);
@@ -359,9 +360,16 @@ int main(int argc, char** argv) {
       double finalTime = processorsTime - counter ;
 
       cout << "----------------------------------------------\n";
+      cout<< "The performance of the algorithm:" << endl;
+      cout << "\n";
+      cout << "-Points: " << number0fPoints << endl;
+      cout << "-Dimensions Of Point: " << dimensionsOfPoint << endl;
+      cout << "-Processes: " << world_size << endl;
+      cout << "\n";
       printf ("-Measured Work Took: %0.8f sec", processorsTime);
       cout << "\n";
-      cout << "-Measured Generation of Points Took: " << counter << " seconds to run." <<endl;
+      printf ("-Measured Generation of Points Took: %0.8f seconds to run.", counter);
+      cout << "\n";
       cout << "\n";
       cout << "-Measured Whole Work Took: " << finalTime << " seconds." <<endl;
       cout << "----------------------------------------------\n";
