@@ -15,8 +15,8 @@ double counter = 0.0;
 int world_rank;
 int world_size;
 
-int number0fPoints = 7443233; // Arithmos simeiwn pou tha dimiourgithoun.
-int dimensionsOfPoint = 3; // Arithmos twn diastasewn twn simeiwn, px 2 gia 2D -> x1,x2,y1,y2.
+int number0fPoints = 7422; // Arithmos simeiwn pou tha dimiourgithoun.
+int dimensionsOfPoint = 2; // Arithmos twn diastasewn twn simeiwn, px 2 gia 2D -> x1,x2,y1,y2.
 
 float distanceT1 = 200; // Xalari apostasi katwfliwn (T1 > T2).
 float distanceT2 = 100; // Steni apostasi katwfliwn.
@@ -59,12 +59,15 @@ public:
     return vals[i];
   }
 
-  float get_squared_dist(Point& other_point) const {
+  // Ipologismos eukleideias apostastis
+  float get_euclidian_dist(Point& other_point) const {
     float result = 0.0;
-    for (int i=0; i<dimensionsOfPoint; i++) {
-      result += pow(vals[i] - other_point.vals[i], 2);
+    for (int i=0; i<dimensionsOfPoint; i++) { // Epanalipsi gia an afairesoume kathe diastasi tou simieiou
+      // Ipologismos dinamis meso tis pow( something , 2) , me to deutero orisma
+      // dilonoume ton ektheti ara edo tetragonizoume    
+      result += pow(vals[i] - other_point.vals[i], 2); 
     }
-    return result;
+    return sqrt(result); // Epistrofi apostasis kai ipologismos rizas gia tin eukleideia apostasi
   }
 
   void print() const {
@@ -83,29 +86,29 @@ private:
   Point* centre;
 public:
 
-  // prosthiki center sto data_points
+  // Prosthiki center sto data_points
   Canopy(Point* centre) {
     assert(centre);
     this->centre = centre;
     data_points.push_back(centre);
   }
 
-  // prosthiki simeiou sto vector
+  // Prosthiki simeiou sto vector
   void add_point(Point* point) {
     data_points.push_back(point);
   }
 
-  // pernoume ta simeia apo to data_points
+  // Pernoume ta simeia apo to data_points
   vector<Point*> get_data_points() {
     return data_points;
   }
 
-  // ektiposi ton kentron
+  // Ektiposi ton kentron (canopy)
   void printCenter() {
     centre->print();
   }
 
-  // ektiposi ton simeion gia kathe cluster 
+  // Ektiposi ton simeion gia kathe canopy 
   void printElements() const {
     for (int i=0; i<data_points.size(); i++) {
       cout << "\t";
@@ -161,7 +164,7 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     }
   }
 
-  // diamerismos dedomenos pros sistadopoihsi se oles tis diergasies
+  // Diamerismos dedomenos pros sistadopoihsi se oles tis diergasies
   MPI_Scatterv(data, scatter_counts, scatter_displs, MPI_FLOAT,
                rec_buff, rec_buff_cnt, MPI_FLOAT,
                0, MPI_COMM_WORLD);
@@ -189,11 +192,11 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
     point_set.erase(new_canopy_centre);
     vector<Point*> points_to_erase;
     for (Point* p : point_set) {
-      float squared_dist = new_canopy_centre->get_squared_dist(*p);
-      if (squared_dist < distanceT1 * distanceT1) {
+      float euclidian_dist = new_canopy_centre->get_euclidian_dist(*p);
+      if (euclidian_dist < distanceT1 ) {
         new_canopy.add_point(p);
       }
-      if (squared_dist < distanceT2 * distanceT2) {
+      if (euclidian_dist < distanceT2 ) {
         points_to_erase.push_back(p);
       }
     }
@@ -255,11 +258,11 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
 
     vector<Point*> points_to_erase;
     for (Point* p : point_set) {
-      float squared_dist = new_canopy_centre->get_squared_dist(*p);
-      if (squared_dist < distanceT1 * distanceT1) {
+      float euclidian_dist = new_canopy_centre->get_euclidian_dist(*p);
+      if (euclidian_dist < distanceT1 ) {
         canopy_id_send_data[p->get_point_id()] = canopy_id;
       }
-      if (squared_dist < distanceT2 * distanceT2) {
+      if (euclidian_dist < distanceT2 ) {
         points_to_erase.push_back(p);
       }
     }
