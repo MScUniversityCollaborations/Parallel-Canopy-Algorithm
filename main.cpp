@@ -15,7 +15,7 @@ double counter = 0.0;
 int world_rank;
 int world_size;
 
-int number0fPoints = 7422; // Arithmos simeiwn pou tha dimiourgithoun.
+int number0fPoints = 722; // Arithmos simeiwn pou tha dimiourgithoun.
 int dimensionsOfPoint = 2; // Arithmos twn diastasewn twn simeiwn, px 2 gia 2D -> x1,x2,y1,y2.
 
 float distanceT1 = 200; // Xalari apostasi katwfliwn (T1 > T2).
@@ -67,7 +67,8 @@ public:
       // dilonoume ton ektheti ara edo tetragonizoume    
       result += pow(vals[i] - other_point.vals[i], 2); 
     }
-    return sqrt(result); // Epistrofi apostasis kai ipologismos rizas gia tin eukleideia apostasi
+    // Epistrofi apostasis kai ipologismos rizas gia tin eukleideia apostasi
+    return sqrt(result); 
   }
 
   void print() const {
@@ -140,19 +141,24 @@ vector<Canopy> canopy_mpi(vector<Point*>& all_points) {
   float* rec_buff = new float[rec_buff_cnt];
 
   vector<Point*> points;
-
-  int* scatter_counts = new int[world_size];
+  // Ypologismoi gia tin scatterv
+  // Dimiourgia scatter_counts (dieuthisi) vasi tou world_size 
+  // vazoume diladi ena pinaka tipou integer megethous world_size
+  // Paromio tropo ginete kai me tin scatter_displs
+  int* scatter_counts = new int[world_size]; 
   int* scatter_displs = new int[world_size];
   int sum = 0;
-  for (int i=0; i<world_size; i++) {
+  for (int i=0; i<world_size; i++) {  // gia kathe diergasia tote
+    // dimerismos ton simeion vasi tou word size (epi tis diastasis tou simeiou)
     scatter_counts[i] =  number0fPoints / world_size * dimensionsOfPoint;
-    if (i < number0fPoints % world_size) {
-      scatter_counts[i] += dimensionsOfPoint;
+    if (i < number0fPoints % world_size) { //ean einai to mod megalitero tou i 
+     // tote apothikeuse tis diastasis tou simeiou sti desi i opou einai ki arithos ti diergasias
+      scatter_counts[i] +=  dimensionsOfPoint; // a += b or a = a + b
     }
-    scatter_displs[i] = sum;
-    sum += scatter_counts[i];
+    scatter_displs[i] = sum; // apothikeusi metatopisis gia kathe diergasia gia to dianisma scatter_counts
+    sum += scatter_counts[i]; // metatopisi metriti stin epomeni thesi vasi ton theseon pou pire to scatter_counts[i]
   }
-
+  // Ypologismos tou data gia scatterv
   float* data = NULL;
   if (world_rank == 0) {
     data = new float[number0fPoints * dimensionsOfPoint];
@@ -366,7 +372,7 @@ int main(int argc, char** argv) {
       double finalTime = processorsTime - counter ;
 
       cout << "----------------------------------------------\n";
-      cout<< "The performance of the algorithm:" << endl;
+      cout << "The performance of the algorithm:" << endl;
       cout << "\n";
       cout << "-Points: " << number0fPoints << endl;
       cout << "-Dimensions Of Point: " << dimensionsOfPoint << endl;
